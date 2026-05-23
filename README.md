@@ -9,8 +9,9 @@ Più che un'applicazione completa, è un **esercizio di stile** e un **playgroun
 ## Funzionalità
 
 - **Ricerca libri** tramite le API pubbliche di [Open Library](https://openlibrary.org/developers/api)
+- **Paginazione infinita** — i risultati vengono caricati 16 alla volta; scorrendo fino in fondo alla pagina il batch successivo viene recuperato automaticamente tramite `IntersectionObserver`
 - **Storico delle ricerche** con dropdown sotto la barra di ricerca (ultime 5 query)
-- **Filtro per anno** di pubblicazione sui risultati
+- **Filtro per anno** di pubblicazione sui risultati caricati
 - **Preferiti** con persistenza su `localStorage`
 - **Suggerimenti AI** generati da un LLM locale (Ollama) in base alla cronologia di ricerca
 
@@ -93,7 +94,7 @@ OLLAMA_MODEL=mistral npm run dev
 
 | Metodo | Endpoint | Descrizione |
 |---|---|---|
-| `GET` | `/api/search?query=...` | Ricerca libri su Open Library |
+| `GET` | `/api/search?query=&limit=16&offset=0` | Ricerca libri su Open Library con paginazione |
 | `POST` | `/api/suggestions` | Genera suggerimenti AI dalla cronologia |
 
 Esempio richiesta suggerimenti:

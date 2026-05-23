@@ -124,6 +124,22 @@ Il comportamento attuale è quindi:
 - applicando un filtro dopo aver caricato pochi risultati si potrebbe vedere un sottoinsieme parziale; caricando più pagine il filtro diventa via via più accurato
 - ogni nuova ricerca azzera sia i risultati che la selezione dell'anno
 
+### Preferiti e persistenza localStorage
+
+I preferiti sono gestiti nello store Zustand e persistiti su `localStorage` in modo sincrono ad ogni modifica, senza librerie aggiuntive.
+
+**Identificazione univoca:** ogni libro è identificato da `cover_id ?? title`. La stessa chiave è usata come `key` React nelle card, come lookup nei preferiti e come criterio di deduplicazione, garantendo coerenza in tutto il componente.
+
+**Lettura al caricamento:** `loadFavorites()` viene chiamata direttamente nell'inizializzazione dello store — non in un `useEffect` — così i preferiti sono disponibili al primo render senza flash di stato intermedio:
+
+```js
+favorites: loadFavorites()  // eseguito una sola volta alla creazione dello store
+```
+
+**Scrittura:** `toggleFavorite(book)` aggiunge o rimuove il libro dall'array e chiama `saveFavorites()` all'interno dello stesso aggiornamento di stato, mantenendo store e `localStorage` sempre sincronizzati.
+
+**UI:** il cuore sulla card è vuoto (`🤍`) o pieno (`❤️`) in base a un `Set` di id calcolato al render. L'uso di un `Set` garantisce lookup in O(1) anche con molti preferiti.
+
 ### Suggerimenti AI con Ollama
 
 I suggerimenti sono generati da un modello linguistico locale tramite [Ollama](https://ollama.com/), senza dipendenze da API cloud esterne. Il flusso è:

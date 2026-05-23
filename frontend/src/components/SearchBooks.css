@@ -154,6 +154,15 @@
   color: #dc2626;
 }
 
+.sb-loading-more {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.sb-sentinel {
+  height: 1px;
+}
+
 /* Filtro anno */
 .sb-year-filter {
   display: flex;

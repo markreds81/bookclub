@@ -4,9 +4,9 @@ const axios = require('axios');
 const router = Router();
 
 router.get('/', async (req, res) => {
-  const { query } = req.query;
+  const { query, limit = 16, offset = 0 } = req.query;
 
-  console.log(`[GET /api/search] query="${query}"`);
+  console.log(`[GET /api/search] query="${query}" limit=${limit} offset=${offset}`);
 
   if (!query || query.trim() === '') {
     console.log('[GET /api/search] Errore: query vuota');
@@ -17,11 +17,12 @@ router.get('/', async (req, res) => {
     console.log(`[GET /api/search] Chiamata Open Library con title="${query}"`);
 
     const response = await axios.get('https://openlibrary.org/search.json', {
-      params: { title: query, limit: 10 },
-      timeout: 5000,
+      params: { title: query, limit: Number(limit), offset: Number(offset) },
+      timeout: 8000,
     });
 
-    console.log(`[GET /api/search] Open Library risposta: ${response.data.numFound} risultati totali`);
+    const total = response.data.numFound || 0;
+    console.log(`[GET /api/search] Open Library risposta: ${total} risultati totali`);
 
     const books = (response.data.docs || []).map((doc) => {
       const book = {
@@ -38,12 +39,13 @@ router.get('/', async (req, res) => {
       return book;
     });
 
-    console.log(`[GET /api/search] Restituiti ${books.length} libri`);
+    console.log(`[GET /api/search] Restituiti ${books.length} libri (offset=${offset}, total=${total})`);
 
     return res.json({
       success: true,
       query,
       count: books.length,
+      total,
       books,
     });
   } catch (err) {

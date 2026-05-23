@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBookStore } from '../store/bookStore';
 import './SearchBooks.css';
 
@@ -6,10 +6,13 @@ export function SearchBooks() {
   const [query, setQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const sentinelRef = useRef(null);
+
   const {
-    books, loading, error, searchBooks, searchHistory,
+    books, loading, loadingMore, error, searchBooks, searchHistory,
     favorites, toggleFavorite,
     suggestions, suggestionsLoading,
+    hasMore, loadMoreBooks,
   } = useBookStore();
 
   const favoriteIds = new Set(favorites.map((f) => f.cover_id ?? f.title));
@@ -26,6 +29,7 @@ export function SearchBooks() {
     const trimmed = q.trim();
     if (trimmed) {
       setQuery(trimmed);
+      setSelectedYear('');
       setShowHistory(false);
       searchBooks(trimmed);
     }
@@ -38,6 +42,19 @@ export function SearchBooks() {
   const handleHistoryClick = (item) => {
     handleSearch(item);
   };
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMoreBooks(); },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loadMoreBooks]);
 
   return (
     <div className="sb-container">
@@ -137,11 +154,14 @@ export function SearchBooks() {
           {!loading && !error && books.length > 0 && filteredBooks.length === 0 && (
             <p className="sb-status">Nessun libro trovato per l'anno selezionato.</p>
           )}
+
+          {loadingMore && <p className="sb-status sb-loading-more">⏳ Caricamento altri libri…</p>}
+          {!loading && <div ref={sentinelRef} className="sb-sentinel" />}
         </div>
 
         {(suggestionsLoading || suggestions.length > 0) && (
           <aside className="sb-sidebar">
-            <h2 className="sb-sidebar-title">Suggerimenti</h2>
+            <h2 className="sb-sidebar-title">Cerca anche</h2>
             {suggestionsLoading ? (
               <div className="sb-sidebar-loading">
                 <span className="sb-sidebar-spinner" />

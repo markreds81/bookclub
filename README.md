@@ -124,6 +124,28 @@ Il comportamento attuale è quindi:
 - applicando un filtro dopo aver caricato pochi risultati si potrebbe vedere un sottoinsieme parziale; caricando più pagine il filtro diventa via via più accurato
 - ogni nuova ricerca azzera sia i risultati che la selezione dell'anno
 
+### Suggerimenti AI con Ollama
+
+I suggerimenti sono generati da un modello linguistico locale tramite [Ollama](https://ollama.com/), senza dipendenze da API cloud esterne. Il flusso è:
+
+```
+ultima ricerca completata
+        ↓
+searchHistory (ultime 5 query) inviato a POST /api/suggestions
+        ↓
+backend costruisce il prompt e chiama ollama.generate()
+        ↓
+LLM risponde con JSON { "suggestions": ["...", "...", "..."] }
+        ↓
+3 chip cliccabili nella sidebar
+```
+
+**Prompt engineering:** il modello riceve la cronologia come contesto e deve rispondere esclusivamente con un oggetto JSON valido (`format: 'json'`). La temperatura è impostata a `0.7` per bilanciare creatività e coerenza tematica.
+
+**Fallback:** se Ollama non è in esecuzione, il modello non è disponibile o la risposta non è JSON valido, l'endpoint risponde comunque con un array di suggerimenti generici (`['narrativa contemporanea', 'classici', 'gialli']`) senza esporre l'errore al frontend.
+
+**Trigger:** i suggerimenti vengono rigenerati automaticamente ad ogni nuova ricerca andata a buon fine, riflettendo sempre la cronologia aggiornata.
+
 ---
 
 ## API Backend

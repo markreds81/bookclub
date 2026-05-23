@@ -90,6 +90,32 @@ OLLAMA_MODEL=mistral npm run dev
 
 ---
 
+## Note tecniche
+
+### Paginazione infinita con IntersectionObserver
+
+Lo scroll infinito è implementato con la [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) nativa del browser, preferita a un semplice scroll listener per tre motivi:
+
+- **Performance** — non scatta ad ogni evento scroll (decine al secondo), ma solo quando un elemento cambia stato di visibilità
+- **Precisione** — il callback è legato a un elemento sentinel (`<div>` da 1px) posizionato sotto la griglia; quando entra nel viewport viene caricato il batch successivo
+- **Standard moderno** — è l'approccio usato da Twitter, YouTube e altri feed infiniti
+
+```
+┌─────────────────────────┐
+│  card  card  card  card │
+│  card  card  card  card │  ← viewport
+│  card  card  card  card │
+├─────────────────────────┤
+│  [sentinel — 1px]       │  ← IntersectionObserver lo osserva
+└─────────────────────────┘
+        ↓ entra nel viewport
+   loadMoreBooks() chiamata
+```
+
+**Nota implementativa:** il sentinel deve essere sempre presente nel DOM (non condizionale). Se venisse montato/smontato in base allo stato di caricamento, l'observer si ricollegherebbe quando il ref è ancora `null`, mancando il trigger. Le dipendenze dell'`useEffect` (`hasMore`, `loadingMore`) garantiscono che l'observer venga ricreato al momento giusto, e con `threshold: 0` il callback scatta non appena un singolo pixel del sentinel diventa visibile.
+
+---
+
 ## API Backend
 
 | Metodo | Endpoint | Descrizione |

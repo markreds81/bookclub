@@ -54,28 +54,37 @@ bookclub/
 - Node.js 18+
 - [Ollama](https://ollama.com/) installato e in esecuzione con almeno un modello (es. `llama3`, `mistral`)
 
-### Backend
+### Installazione dipendenze
+
+Al primo avvio installa le dipendenze di tutti e tre i package:
 
 ```bash
-cd api-backend
 npm install
-node server.js
-# → http://localhost:3001
+npm install --prefix api-backend
+npm install --prefix frontend
 ```
 
-Il modello Ollama usato per i suggerimenti è configurabile tramite variabile d'ambiente:
+### Avvio (comando unico)
 
 ```bash
-OLLAMA_MODEL=mistral node server.js
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
 npm run dev
-# → http://localhost:5173
+```
+
+Avvia backend e frontend in parallelo. L'output è colorato e prefissato per distinguere i log dei due processi:
+
+| Processo | URL |
+|---|---|
+| `backend` | http://localhost:3001 |
+| `frontend` | http://localhost:5173 |
+
+Per terminare entrambi: **Ctrl+C**
+
+### Variabili d'ambiente
+
+Il modello Ollama è configurabile tramite variabile d'ambiente (default: `llama3`):
+
+```bash
+OLLAMA_MODEL=mistral npm run dev
 ```
 
 ---

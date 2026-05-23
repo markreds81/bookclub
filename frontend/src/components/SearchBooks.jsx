@@ -46,12 +46,10 @@ export function SearchBooks() {
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMoreBooks(); },
-      { threshold: 0.1 }
+      { threshold: 0 }
     );
-
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [hasMore, loadingMore, loadMoreBooks]);
@@ -156,7 +154,7 @@ export function SearchBooks() {
           )}
 
           {loadingMore && <p className="sb-status sb-loading-more">⏳ Caricamento altri libri…</p>}
-          {!loading && <div ref={sentinelRef} className="sb-sentinel" />}
+          <div ref={sentinelRef} className="sb-sentinel" />
         </div>
 
         {(suggestionsLoading || suggestions.length > 0) && (
